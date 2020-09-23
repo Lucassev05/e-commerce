@@ -64,15 +64,14 @@ const abrirCarrinho = (ctx) => {
 
 // Listar apenas um pedido a partir de um id
 const exibirPedidoEspecifico = (ctx, id) => {
-  let elementoEncontrado = false;
+  let elementoNaoEncontrado = true;
   listaDePedidos.forEach((element) => {
-    if (element.id == id) {
-      elementoEncontrado = element;
+    if ((element.idCliente = id)) {
+      elementoNaoEncontrado = false;
+      ctx.body = element;
     }
   });
-  if (elementoEncontrado) {
-    ctx.body = elementoEncontrado;
-  } else {
+  if (elementoNaoEncontrado) {
     mensagemDeErro(ctx, 404, "Pedido não encontrado");
   }
 };
@@ -154,63 +153,39 @@ const adicionarProdutoNoPedido = (ctx, id) => {
           );
         }
       } else if (produtoExisteNoPedido && informacoesDoProduto) {
-        const qtdParaAtualizar =
-          novoProduto.quantidade -
-          arrayDeItensDoPedido[indexDoProdutoNoPedido].quantidade;
-        let atualizouProduto = false;
-
-        if (qtdParaAtualizar < 0) {
-          arrayDeItensDoPedido[indexDoProdutoNoPedido].quantidade =
+        if (
+          !informacoesDoProduto.deletado &&
+          informacoesDoProduto.quantidade >= novoProduto.quantidade
+        ) {
+          arrayDeItensDoPedido[indexDoProdutoNoPedido].quantidade +=
             novoProduto.quantidade;
-
-          atualizouProduto = atualizarQuantidadeProduto(
+          const atualizouProduto = atualizarQuantidadeProduto(
             novoProduto.id,
-            Math.abs(qtdParaAtualizar),
-            false
+            novoProduto.quantidade
           );
 
-          listaDePedidos[indexDoPedido].valorTotal -=
-            informacoesDoProduto.valor * Math.abs(qtdParaAtualizar);
-        } else {
-          if (
-            !informacoesDoProduto.deletado &&
-            informacoesDoProduto.quantidade >= qtdParaAtualizar
-          ) {
-            arrayDeItensDoPedido[
-              indexDoProdutoNoPedido
-            ].quantidade += qtdParaAtualizar;
-            atualizouProduto = atualizarQuantidadeProduto(
-              novoProduto.id,
-              qtdParaAtualizar
-            );
+          listaDePedidos[indexDoPedido].valorTotal +=
+            informacoesDoProduto.valor * novoProduto.quantidade;
 
-            listaDePedidos[indexDoPedido].valorTotal +=
-              informacoesDoProduto.valor * qtdParaAtualizar;
-          } else if (informacoesDoProduto.deletado) {
-            mensagemDeErro(
-              ctx,
-              404,
-              "Produto não pode ser adicionado ao seu pedido"
-            );
-          } else if (informacoesDoProduto.quantidade < novoProduto.quantidade) {
-            mensagemDeErro(
-              ctx,
-              404,
-              "Quantidade de produtos insuficiente no estoque!"
-            );
+          if (atualizouProduto) {
+            mensagemDeSucesso(ctx, 201, novoProduto);
+          } else {
+            mensagemDeErro(ctx, 404, "Produto não encontrado");
           }
-        }
-
-        if (atualizouProduto) {
-          mensagemDeSucesso(ctx, 201, novoProduto);
-        } else {
-          console.log("entrei no primeiro else");
+        } else if (informacoesDoProduto.deletado) {
+          mensagemDeErro(
+            ctx,
+            404,
+            "Produto não pode ser adicionado ao seu pedido"
+          );
+        } else if (informacoesDoProduto.quantidade < novoProduto.quantidade) {
           mensagemDeErro(
             ctx,
             404,
             "Quantidade de produtos insuficiente no estoque!"
           );
         }
+        // }
       } else if (!informacoesDoProduto) {
         mensagemDeErro(ctx, 403, "Produto não encontrado");
       }
