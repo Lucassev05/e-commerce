@@ -136,20 +136,20 @@ const adicionarProdutoNoPedido = (ctx, id) => {
           } else {
             mensagemDeErro(
               ctx,
-              403,
+              406,
               "O item não pode ser adicionado ao seu pedido"
             );
           }
         } else if (informacoesDoProduto.deletado) {
           mensagemDeErro(
             ctx,
-            403,
+            406,
             "O item não pode ser adicionado ao seu pedido"
           );
         } else if (informacoesDoProduto.quantidade < novoProduto.quantidade) {
           mensagemDeErro(
             ctx,
-            403,
+            406,
             "Quantidade de produtos insuficiente no estoque!"
           );
         }
@@ -189,13 +189,13 @@ const adicionarProdutoNoPedido = (ctx, id) => {
           } else if (informacoesDoProduto.deletado) {
             mensagemDeErro(
               ctx,
-              404,
+              406,
               "Produto não pode ser adicionado ao seu pedido"
             );
           } else if (informacoesDoProduto.quantidade < novoProduto.quantidade) {
             mensagemDeErro(
               ctx,
-              404,
+              406,
               "Quantidade de produtos insuficiente no estoque!"
             );
           }
@@ -206,15 +206,15 @@ const adicionarProdutoNoPedido = (ctx, id) => {
         } else {
           mensagemDeErro(
             ctx,
-            404,
+            406,
             "Quantidade de produtos insuficiente no estoque!"
           );
         }
       } else if (!informacoesDoProduto) {
-        mensagemDeErro(ctx, 403, "Produto não encontrado");
+        mensagemDeErro(ctx, 404, "Produto não encontrado");
       }
     } else {
-      mensagemDeErro(ctx, 403, "Pedidos processados não podem ser alterados!");
+      mensagemDeErro(ctx, 406, "Pedidos processados não podem ser alterados!");
     }
   } else {
     mensagemDeErro(ctx, 404, "Pedido não encontrado");

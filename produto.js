@@ -23,15 +23,22 @@ DELETADO: BOOLEAN
 const { mensagemDeErro, mensagemDeSucesso } = require("./helpers");
 const arrayDeProdutos = [];
 const adicionarNovoProduto = (ctx, produto) => {
-  let novoProduto = {
-    id: arrayDeProdutos.length + 1,
-    nome: produto.nome,
-    quantidade: produto.quantidade,
-    valor: produto.valor,
-    deletado: false,
-  };
-  arrayDeProdutos.push(novoProduto);
-  mensagemDeSucesso(ctx, 201);
+  let temNome = produto.hasOwnProperty("nome");
+  let temQuantidade = produto.hasOwnProperty("quantidade");
+  let temvalor = produto.hasOwnProperty("valor");
+  if (temNome && temQuantidade && temvalor) {
+    let novoProduto = {
+      id: arrayDeProdutos.length + 1,
+      nome: produto.nome,
+      quantidade: produto.quantidade,
+      valor: produto.valor,
+      deletado: false,
+    };
+    arrayDeProdutos.push(novoProduto);
+    mensagemDeSucesso(ctx, 201);
+  } else {
+    mensagemDeErro(ctx, 400, "Requisição inválida");
+  }
 };
 
 const listarTodosProdutos = (ctx) => {
