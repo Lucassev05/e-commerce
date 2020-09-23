@@ -204,7 +204,6 @@ const adicionarProdutoNoPedido = (ctx, id) => {
         if (atualizouProduto) {
           mensagemDeSucesso(ctx, 201, novoProduto);
         } else {
-          console.log("entrei no primeiro else");
           mensagemDeErro(
             ctx,
             404,
