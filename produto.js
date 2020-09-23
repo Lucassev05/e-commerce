@@ -38,17 +38,24 @@ const listarTodosProdutos = (ctx) => {
   ctx.body = arrayDeProdutos;
 };
 
-const informacaoDoProtudo = (ctx, id) => {
+const informacaoDoProtudo = (ctx, id, pedido = false) => {
   let naoEncontrado = true;
+  let elemento = false;
   arrayDeProdutos.forEach((element) => {
     if (element.id == id) {
-      ctx.body = element;
+      elemento = element;
       naoEncontrado = false;
       return;
     }
   });
-  if (naoEncontrado) {
-    mensagemDeErro(ctx, 404, "Produto não encontrado");
+  if (!pedido) {
+    if (elemento) {
+      ctx.body = elemento;
+    } else {
+      mensagemDeErro(ctx, 404, "Produto não encontrado");
+    }
+  } else {
+    return elemento;
   }
 };
 
@@ -98,19 +105,24 @@ const atualizarProduto = (ctx, id) => {
   }
 };
 
-const atualizarQuantidadeProduto = (ctx, id, decrementar = true) => {
+const atualizarQuantidadeProduto = (id, qtd, decrementar = true) => {
+  let sucesso = false;
   arrayDeProdutos.forEach((element, i) => {
     if (element.id == id) {
       if (decrementar) {
-        arrayDeProdutos[i].quantidade--;
-        return true;
+        arrayDeProdutos[i].quantidade -= qtd;
+        sucesso = true;
       } else {
-        arrayDeProdutos[i].quantidade++;
-        return true;
+        arrayDeProdutos[i].quantidade += qtd;
+        sucesso = true;
       }
     }
   });
-  return false;
+  if (sucesso) {
+    return true;
+  } else {
+    return false;
+  }
 };
 
 module.exports = {

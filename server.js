@@ -6,8 +6,16 @@ const {
   informacaoDoProtudo,
   deletarProduto,
   atualizarProduto,
-  atualizarQuantidadeProduto,
 } = require("./produto.js");
+const {
+  listarTodosPedidos,
+  abrirCarrinho,
+  exibirPedidoEspecifico,
+  listarPedidosPorEstado,
+  adicionarProdutoNoPedido,
+  atualizarStatusDoPedido,
+  removerPedido,
+} = require("./pedido");
 const { mensagemDeErro } = require("./helpers");
 
 const server = new Koa();
@@ -37,32 +45,55 @@ server.use((ctx) => {
       mensagemDeErro(ctx, 405, "Método não permitido");
     }
   } else if (path == "/orders") {
-    if (method == "GET") {
-      // lista todos os pedidos
+    if (method == "POST") {
+      abrirCarrinho(ctx);
+    } else if (method == "GET") {
+      listarTodosPedidos(ctx);
     } else {
       mensagemDeErro(ctx, 405, "Método não permitido");
     }
   } else if (path.includes("/orders")) {
     const id = Number(path.split("/")[2]);
-    let filtro = path.split("?")[1].split("=")[1];
-    if (method == "POST") {
-      // adicionar um novo produto na lista de pedidos
-    } else if (method == "GET") {
-      if (id) {
-        // listar apenas um pedido com id
+    let estado = path.split("?")[1]; //.split("=")[1];
+
+    if (method == "GET") {
+      if (id > 0) {
+        exibirPedidoEspecifico(ctx, id);
       } else if (estado) {
-        // listar pedidos com o estado especifico
+        if (estado.includes("=") && estado.split("=")[0] == "estado") {
+          estado = estado.split("=")[1];
+          listarPedidosPorEstado(ctx, estado);
+        } else {
+          mensagemDeErro(ctx, 400, "Requisição Inválida");
+        }
       } else {
-        // tratamento de erro
+        mensagemDeErro(ctx, 400, "Requisição Inválida");
       }
     } else if (method == "PUT") {
-      // alterar status de um pedido
+      if (id) {
+        const bodyDaRequisicao = ctx.request.body;
+        const existeIdDoProduto = bodyDaRequisicao.hasOwnProperty("id");
+        const existeQuantidade = bodyDaRequisicao.hasOwnProperty("quantidade");
+        const existeStatus = bodyDaRequisicao.hasOwnProperty("estado");
+
+        if (existeIdDoProduto && existeQuantidade && !existeStatus) {
+          adicionarProdutoNoPedido(ctx, id);
+          // adicionar if para remover ou adicionar produto
+        } else if (existeStatus && !existeQuantidade && !existeIdDoProduto) {
+          atualizarStatusDoPedido(ctx, id);
+        } else {
+          mensagemDeErro(ctx, 400, "Requisição Inválida");
+        }
+      } else {
+        mensagemDeErro(ctx, 400, "Requisição Inválida");
+      }
     } else if (method == "DELETE") {
-      // remove um produto na lista de pedidos
+      removerPedido(ctx, id);
     } else {
       mensagemDeErro(ctx, 405, "Método não permitido");
     }
   }
 });
+// alterar status de um pedido
 
 server.listen(5000, () => console.log("Rodando na porta 5000"));
